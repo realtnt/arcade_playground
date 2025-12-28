@@ -2,7 +2,7 @@ import arcade
 
 import starfield
 import player
-from constants import * # noqa: F403
+from constants import *
 
 
 
