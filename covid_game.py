@@ -1,80 +1,76 @@
 import arcade
 
-import random
+import starfield
+import player
+from constants import *
 
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
-WINDOW_TITLE = "Covid19"
 
-bg_star_color = (255, 255, 255, 95)
-fg_star_colors = [arcade.color.WHITE, arcade.color.BABY_BLUE, arcade.color.AQUA, arcade.color.BUFF, arcade.color.ALIZARIN_CRIMSON]
-
-def create_starfield(batch: arcade.shape_list.ShapeElementList, color=bg_star_color, random_color=False):
-    for i in range(200):
-        x = random.randint(0, 1280)
-        y = random.randint(0, 720)
-        w = random.randint(1, 3)
-        h = random.randint(1, 3)
-        if random_color:
-            color = random.choice(fg_star_colors)
-        star = arcade.shape_list.create_rectangle_filled(x, y, w, h, color)
-        batch.append(star)
 
 class GameView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
-        self.fg_star_speed = 100
-        self.bg_star_speed = 60
-        
-        self.fg_stars1 = arcade.shape_list.ShapeElementList()
-        create_starfield(self.fg_stars1, random_color=True)
-        
-        self.fg_stars2 = arcade.shape_list.ShapeElementList()
-        self.fg_stars2.center_x = WINDOW_WIDTH
-        create_starfield(self.fg_stars2, random_color=True)
-        
-        self.bg_stars1 = arcade.shape_list.ShapeElementList()
-        create_starfield(self.bg_stars1)
-        
-        self.bg_stars2 = arcade.shape_list.ShapeElementList()
-        self.bg_stars2.center_x = WINDOW_WIDTH
-        create_starfield(self.bg_stars2)
-        
+
+        self.directions = {"up": False, "down": False, "left": False, "right": False}
+
+        self.player_height = 30
+        self.player_width = 55
+        self.player_x = 10
+        self.player_y = WINDOW_HEIGHT // 2 - self.player_height // 2
+
+        self.starfield = starfield.Starfield()
+
+        self.left_texture = arcade.load_texture(":resources:images/enemies/bee.png")
+        self.right_texture = self.left_texture.flip_left_right()
+
+        self.sprites = arcade.SpriteList()
+        self.player_sprite = player.Player(self.left_texture, self.right_texture)
         
         
         
+        self.player_sprite.position = (50, WINDOW_HEIGHT / 2 - self.player_sprite.height / 2)
+        self.sprites.append(self.player_sprite)
+
     def on_draw(self) -> None:
         self.clear()
-        
-        self.fg_stars1.draw()
-        self.fg_stars2.draw()
-        self.bg_stars1.draw()
-        self.bg_stars2.draw()
-        
+        self.starfield.draw()
+        self.sprites.draw()
+
     def on_update(self, delta_time) -> None:
-        self.fg_stars1.center_x -= self.fg_star_speed * delta_time
-        self.fg_stars2.center_x -= self.fg_star_speed * delta_time
-        if self.fg_stars1.center_x < -WINDOW_WIDTH:
-            self.fg_stars1.center_x = WINDOW_WIDTH
-        if self.fg_stars2.center_x < -WINDOW_WIDTH:
-            self.fg_stars2.center_x = WINDOW_WIDTH
-        
-        
-        self.bg_stars1.center_x -= self.bg_star_speed * delta_time
-        self.bg_stars2.center_x -= self.bg_star_speed * delta_time
-        if self.bg_stars1.center_x < -WINDOW_WIDTH:
-            self.bg_stars1.center_x = WINDOW_WIDTH
-        if self.bg_stars2.center_x < -WINDOW_WIDTH:
-            self.bg_stars2.center_x = WINDOW_WIDTH
-        
-    
-     
-def main() -> None:      
-    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE) 
+        self.starfield.update(delta_time)
+        self.sprites.update()
+
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
+        if symbol == arcade.key.UP:
+            self.player_sprite.change_y = MOVEMENT_SPEED
+        if symbol == arcade.key.DOWN:
+            self.player_sprite.change_y = -MOVEMENT_SPEED
+        if symbol == arcade.key.LEFT:
+            self.player_sprite.change_x = -MOVEMENT_SPEED
+        if symbol == arcade.key.RIGHT:
+            self.player_sprite.change_x = MOVEMENT_SPEED
+        if symbol == arcade.key.SPACE:
+            print("fire")
+        if symbol == arcade.key.ESCAPE:
+            arcade.close_window()
+
+    def on_key_release(self, symbol: int, modifiers: int) -> None:
+        if symbol == arcade.key.UP:
+            self.player_sprite.change_y = 0
+        if symbol == arcade.key.DOWN:
+            self.player_sprite.change_y = 0
+        if symbol == arcade.key.LEFT:
+            self.player_sprite.change_x = 0
+        if symbol == arcade.key.RIGHT:
+            self.player_sprite.change_x = 0
+
+
+def main() -> None:
+    window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     window.center_window()
     game = GameView()
     window.show_view(game)
     arcade.run()
+
 
 if __name__ == "__main__":
     main()
