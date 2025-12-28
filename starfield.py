@@ -2,7 +2,7 @@ import random
 
 import arcade
 
-from constants import *
+from constants import * # noqa: F403
 
 BG_STAR_COLORS = (255, 255, 255, 95)
 FG_STAR_COLORS = [

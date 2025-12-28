@@ -1,5 +1,5 @@
 import arcade
-from constants import *
+from constants import * # noqa: F403
 
 class Player(arcade.Sprite):
     def __init__(self, left_texture, right_texture):
