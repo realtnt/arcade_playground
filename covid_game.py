@@ -142,7 +142,7 @@ class GameView(arcade.View):
             ),
         )
         self.virus_list.append(self.virus)
-        self.virus.change_x = BULLET_SPEED
+        self.virus.change_x = VIRUS_SPEED
 
     def spawn_bloodclot(self) -> None:
         self.bloodclot = bloodclot.Bloodclot(self.bloodclot_texture)
