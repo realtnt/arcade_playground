@@ -1,25 +1,39 @@
+import random
+
 import arcade
 
+import bloodclot
 import bullet
 import player
 import starfield
+import virus
 from constants import *
 
 
 class GameView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
-        
+        self.time_since_last_virus = 0.0
         self.bullets_allowed = 40
         self.directions = {"up": False, "down": False, "left": False, "right": False}
         self.starfield = starfield.Starfield()
-        self.bullet_list = arcade.SpriteList()     
+        self.bullet_list = arcade.SpriteList()
         self.sprites = arcade.SpriteList()
+        self.bloodclot_list = arcade.SpriteList()
+        self.virus_list = arcade.SpriteList()
 
     def setup(self) -> None:
-        self.bullet_texture = arcade.load_texture(":resources:/images/space_shooter/laserBlue01.png")
+        self.bullet_texture = arcade.load_texture(
+            ":resources:/images/space_shooter/laserBlue01.png"
+        )
+        self.bloodclot_texture = arcade.load_texture(
+            ":resources:/images/enemies/saw.png"
+        )
+        self.virus_texture = arcade.load_texture(
+            ":resources:/images/enemies/wormGreen_move.png"
+        )
         self.create_player()
-        
+
     def create_player(self) -> None:
         self.player_texture = arcade.load_texture(
             ":resources:/images/space_shooter/playerShip3_orange.png"
@@ -30,18 +44,41 @@ class GameView(arcade.View):
             WINDOW_HEIGHT / 2 - self.player.height / 2,
         )
         self.sprites.append(self.player)
-    
+
     def on_draw(self) -> None:
         self.clear()
         self.starfield.draw()
         self.sprites.draw()
         self.bullet_list.draw()
+        self.virus_list.draw()
 
     def on_update(self, delta_time) -> None:
         self.starfield.update(delta_time)
         self.sprites.update()
         self.bullet_list.update()
-        
+
+        self.time_since_last_virus += delta_time
+        if self.time_since_last_virus >= 1.0:
+            self.time_since_last_virus = 0.0
+            self.spawn_virus()
+        self.virus_list.update()
+
+        virus_hit_list = arcade.check_for_collision_with_list(
+            self.player, self.virus_list
+        )
+
+        for virus_hit in virus_hit_list:
+            virus_hit.remove_from_sprite_lists()
+
+        for bullet_hit in self.bullet_list:
+            bullet_hit_list = arcade.check_for_collision_with_list(
+                bullet_hit, self.virus_list
+            )
+
+            for virus_hit in bullet_hit_list:
+                virus_hit.remove_from_sprite_lists()
+                bullet_hit.remove_from_sprite_lists()
+
     def update_player_speed(self) -> None:
         self.player.change_x = 0
         self.player.change_y = 0
@@ -72,7 +109,7 @@ class GameView(arcade.View):
             self.fire_bullet()
         if symbol == arcade.key.ESCAPE:
             arcade.close_window()
-        
+
     def on_key_release(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP:
             self.directions["up"] = False
@@ -95,7 +132,22 @@ class GameView(arcade.View):
         )
         self.bullet_list.append(self.bullet)
         self.bullet.change_x = BULLET_SPEED
-        
+
+    def spawn_virus(self) -> None:
+        self.virus = virus.Virus(self.virus_texture)
+        self.virus.position = (
+            WINDOW_WIDTH + self.player.width,
+            random.randint(
+                int(self.virus.height), int(WINDOW_HEIGHT - self.virus.height)
+            ),
+        )
+        self.virus_list.append(self.virus)
+        self.virus.change_x = BULLET_SPEED
+
+    def spawn_bloodclot(self) -> None:
+        self.bloodclot = bloodclot.Bloodclot(self.bloodclot_texture)
+
+
 def main() -> None:
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     window.center_window()
