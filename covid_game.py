@@ -1,73 +1,106 @@
 import arcade
 
-import starfield
+import bullet
 import player
+import starfield
 from constants import *
-
 
 
 class GameView(arcade.View):
     def __init__(self) -> None:
         super().__init__()
-
+        
+        self.bullets_allowed = 40
         self.directions = {"up": False, "down": False, "left": False, "right": False}
-
-        self.player_height = 30
-        self.player_width = 55
-        self.player_x = 10
-        self.player_y = WINDOW_HEIGHT // 2 - self.player_height // 2
-
         self.starfield = starfield.Starfield()
-
-        self.left_texture = arcade.load_texture(":resources:images/enemies/bee.png")
-        self.right_texture = self.left_texture.flip_left_right()
-
+        self.bullet_list = arcade.SpriteList()     
         self.sprites = arcade.SpriteList()
-        self.player_sprite = player.Player(self.left_texture, self.right_texture)
-        
-        
-        
-        self.player_sprite.position = (50, WINDOW_HEIGHT / 2 - self.player_sprite.height / 2)
-        self.sprites.append(self.player_sprite)
 
+    def setup(self) -> None:
+        self.bullet_texture = arcade.load_texture(":resources:/images/space_shooter/laserBlue01.png")
+        self.create_player()
+        
+    def create_player(self) -> None:
+        self.player_texture = arcade.load_texture(
+            ":resources:/images/space_shooter/playerShip3_orange.png"
+        ).rotate_90()
+        self.player = player.Player(self.player_texture)
+        self.player.position = (
+            150,
+            WINDOW_HEIGHT / 2 - self.player.height / 2,
+        )
+        self.sprites.append(self.player)
+    
     def on_draw(self) -> None:
         self.clear()
         self.starfield.draw()
         self.sprites.draw()
+        self.bullet_list.draw()
 
     def on_update(self, delta_time) -> None:
         self.starfield.update(delta_time)
         self.sprites.update()
+        self.bullet_list.update()
+        
+    def update_player_speed(self) -> None:
+        self.player.change_x = 0
+        self.player.change_y = 0
+
+        if self.directions["left"] and not self.directions["right"]:
+            self.player.change_x = -MOVEMENT_SPEED
+        if self.directions["right"] and not self.directions["left"]:
+            self.player.change_x = MOVEMENT_SPEED
+        if self.directions["up"] and not self.directions["down"]:
+            self.player.change_y = MOVEMENT_SPEED
+        if self.directions["down"] and not self.directions["up"]:
+            self.player.change_y = -MOVEMENT_SPEED
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP:
-            self.player_sprite.change_y = MOVEMENT_SPEED
+            self.directions["up"] = True
+            self.update_player_speed()
         if symbol == arcade.key.DOWN:
-            self.player_sprite.change_y = -MOVEMENT_SPEED
+            self.directions["down"] = True
+            self.update_player_speed()
         if symbol == arcade.key.LEFT:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
+            self.directions["left"] = True
+            self.update_player_speed()
         if symbol == arcade.key.RIGHT:
-            self.player_sprite.change_x = MOVEMENT_SPEED
-        if symbol == arcade.key.SPACE:
-            print("fire")
+            self.directions["right"] = True
+            self.update_player_speed()
+        if symbol == arcade.key.SPACE and len(self.bullet_list) < self.bullets_allowed:
+            self.fire_bullet()
         if symbol == arcade.key.ESCAPE:
             arcade.close_window()
-
+        
     def on_key_release(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP:
-            self.player_sprite.change_y = 0
+            self.directions["up"] = False
+            self.update_player_speed()
         if symbol == arcade.key.DOWN:
-            self.player_sprite.change_y = 0
+            self.directions["down"] = False
+            self.update_player_speed()
         if symbol == arcade.key.LEFT:
-            self.player_sprite.change_x = 0
+            self.directions["left"] = False
+            self.update_player_speed()
         if symbol == arcade.key.RIGHT:
-            self.player_sprite.change_x = 0
+            self.directions["right"] = False
+            self.update_player_speed()
 
-
+    def fire_bullet(self) -> None:
+        self.bullet = bullet.Bullet(self.bullet_texture)
+        self.bullet.position = (
+            self.player.center_x,
+            self.player.center_y,
+        )
+        self.bullet_list.append(self.bullet)
+        self.bullet.change_x = BULLET_SPEED
+        
 def main() -> None:
     window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
     window.center_window()
     game = GameView()
+    game.setup()
     window.show_view(game)
     arcade.run()
 

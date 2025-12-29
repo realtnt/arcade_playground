@@ -4,6 +4,8 @@ import arcade
 
 from constants import *
 
+FG_STAR_SPEED = 100
+BG_STAR_SPEED = 60
 BG_STAR_COLORS = (255, 255, 255, 95)
 FG_STAR_COLORS = [
     arcade.color.WHITE,
@@ -15,11 +17,9 @@ FG_STAR_COLORS = [
 
 
 class Starfield:
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.fg_star_speed = 100
-        self.bg_star_speed = 60
         self.fg_stars1 = arcade.shape_list.ShapeElementList()
         self.create_starfield(self.fg_stars1, random_color=True)
         self.fg_stars2 = arcade.shape_list.ShapeElementList()
@@ -37,16 +37,16 @@ class Starfield:
         self.bg_stars1.draw()
         self.bg_stars2.draw()
 
-    def update(self, delta_time):
-        self.fg_stars1.center_x -= self.fg_star_speed * delta_time
-        self.fg_stars2.center_x -= self.fg_star_speed * delta_time
+    def update(self, delta_time) -> None:
+        self.fg_stars1.center_x -= FG_STAR_SPEED * delta_time
+        self.fg_stars2.center_x -= FG_STAR_SPEED * delta_time
         if self.fg_stars1.center_x < -WINDOW_WIDTH:
             self.fg_stars1.center_x = WINDOW_WIDTH
         if self.fg_stars2.center_x < -WINDOW_WIDTH:
             self.fg_stars2.center_x = WINDOW_WIDTH
 
-        self.bg_stars1.center_x -= self.bg_star_speed * delta_time
-        self.bg_stars2.center_x -= self.bg_star_speed * delta_time
+        self.bg_stars1.center_x -= BG_STAR_SPEED * delta_time
+        self.bg_stars2.center_x -= BG_STAR_SPEED * delta_time
         if self.bg_stars1.center_x < -WINDOW_WIDTH:
             self.bg_stars1.center_x = WINDOW_WIDTH
         if self.bg_stars2.center_x < -WINDOW_WIDTH:
@@ -57,7 +57,7 @@ class Starfield:
         batch: arcade.shape_list.ShapeElementList,
         color=BG_STAR_COLORS,
         random_color=False,
-    ):
+    ) -> None:
         for i in range(200):
             x = random.randint(0, 1280)
             y = random.randint(0, 720)
