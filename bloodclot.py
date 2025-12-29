@@ -1,5 +1,3 @@
-import random
-
 import arcade
 
 from constants import *
@@ -11,7 +9,6 @@ class Bloodclot(arcade.Sprite):
 
     def update(self, delta_time: float = 1 / 60) -> None:
         self.center_x -= self.change_x
-        self.center_y = random.randint(0, WINDOW_HEIGHT)
         
-        if self.left < 0:
+        if self.left < -self.width:
             self.remove_from_sprite_lists()

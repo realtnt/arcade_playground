@@ -9,6 +9,7 @@ class Virus(arcade.Sprite):
 
     def update(self, delta_time: float = 1 / 60) -> None:
         self.center_x -= self.change_x
+        
         if self.left < -self.width:
             self.remove_from_sprite_lists()
             
