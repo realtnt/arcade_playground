@@ -22,6 +22,9 @@ class GameView(arcade.View):
         self.sprites = arcade.SpriteList()
         self.bloodclot_list = arcade.SpriteList()
         self.virus_list = arcade.SpriteList()
+        self.lives = LIVES
+        self.score = 0
+        self.multiplier = 1
 
     def setup(self) -> None:
         self.bullet_texture = arcade.load_texture(
@@ -53,6 +56,9 @@ class GameView(arcade.View):
         self.bullet_list.draw()
         self.virus_list.draw()
         self.bloodclot_list.draw()
+        
+        arcade.draw_text(f'Score: {self.score}', 20, WINDOW_HEIGHT-20, arcade.color.WHITE, 12)
+        arcade.draw_text(f'Lives: {self.lives}', 20, WINDOW_HEIGHT-40, arcade.color.WHITE, 12)
 
     def on_update(self, delta_time) -> None:
         self.starfield.update(delta_time)
@@ -64,7 +70,7 @@ class GameView(arcade.View):
             self.time_since_last_virus = 0.0
             self.spawn_virus()
         self.virus_list.update()
-        
+
         self.time_since_last_bloodclot += delta_time
         if self.time_since_last_bloodclot >= 2.5:
             self.time_since_last_bloodclot = 0.0
@@ -76,16 +82,26 @@ class GameView(arcade.View):
         )
 
         for virus_hit in virus_hit_list:
+            self.lives -= 1
             virus_hit.remove_from_sprite_lists()
 
         for bullet_hit in self.bullet_list:
-            bullet_hit_list = arcade.check_for_collision_with_list(
+            virus_hit_list = arcade.check_for_collision_with_list(
                 bullet_hit, self.virus_list
             )
 
-            for virus_hit in bullet_hit_list:
+            bloodclot_hit_list = arcade.check_for_collision_with_list(
+                bullet_hit, self.bloodclot_list
+            )
+
+            for bloodclot_hit in bloodclot_hit_list:
+                bloodclot_hit.scale = ENLARGED_BLOODCLOT_SCALE
+                bullet_hit.remove_from_sprite_lists()
+                
+            for virus_hit in virus_hit_list:
                 virus_hit.remove_from_sprite_lists()
                 bullet_hit.remove_from_sprite_lists()
+                self.score += HIT_VALUE * self.multiplier
 
     def update_player_speed(self) -> None:
         self.player.change_x = 0
