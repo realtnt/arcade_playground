@@ -25,6 +25,7 @@ class GameView(arcade.View):
         self.lives = LIVES
         self.score = 0
         self.multiplier = 1
+        self.total_bullets = 1
 
     def setup(self) -> None:
         self.bullet_texture = arcade.load_texture(
@@ -59,6 +60,7 @@ class GameView(arcade.View):
         
         arcade.draw_text(f'Score: {self.score}', 20, WINDOW_HEIGHT-20, arcade.color.WHITE, 12)
         arcade.draw_text(f'Lives: {self.lives}', 20, WINDOW_HEIGHT-40, arcade.color.WHITE, 12)
+        arcade.draw_text(f'Bullets: {self.total_bullets}', 20, WINDOW_HEIGHT-60, arcade.color.WHITE, 12)
 
     def on_update(self, delta_time) -> None:
         self.starfield.update(delta_time)
@@ -95,7 +97,7 @@ class GameView(arcade.View):
             )
 
             for bloodclot_hit in bloodclot_hit_list:
-                bloodclot_hit.scale = ENLARGED_BLOODCLOT_SCALE
+                bloodclot_hit.scale = random.uniform(1.5, 4.5) # ENLARGED_BLOODCLOT_SCALE
                 bullet_hit.remove_from_sprite_lists()
                 
             for virus_hit in virus_hit_list:
@@ -133,6 +135,12 @@ class GameView(arcade.View):
             self.fire_bullet()
         if symbol == arcade.key.ESCAPE:
             arcade.close_window()
+        if symbol == arcade.key.P:
+            if self.total_bullets < 7:
+                self.total_bullets += 1
+        if symbol == arcade.key.L:
+            if self.total_bullets > 1:
+                self.total_bullets -= 1
 
     def on_key_release(self, symbol: int, modifiers: int) -> None:
         if symbol == arcade.key.UP:
@@ -149,13 +157,14 @@ class GameView(arcade.View):
             self.update_player_speed()
 
     def fire_bullet(self) -> None:
-        self.bullet = bullet.Bullet(self.bullet_texture)
-        self.bullet.position = (
-            self.player.center_x,
-            self.player.center_y,
-        )
-        self.bullet_list.append(self.bullet)
-        self.bullet.change_x = BULLET_SPEED
+        for i in range(1, self.total_bullets + 1):
+            self.bullet = bullet.Bullet(self.bullet_texture)
+            self.bullet.position = (
+                self.player.center_x,
+                self.player.center_y + self.total_bullets * BULLETS_GAP // 2 - (i - 1) * BULLETS_GAP - BULLETS_GAP // 2,
+            )
+            self.bullet_list.append(self.bullet)
+            self.bullet.change_x = BULLET_SPEED
 
     def spawn_virus(self) -> None:
         self.virus = virus.Virus(self.virus_texture)
