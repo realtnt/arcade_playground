@@ -6,6 +6,7 @@ from constants import *
 class Bloodclot(arcade.Sprite):
     def __init__(self, texture) -> None:
         super().__init__(texture, scale=SPRITE_SCALING)
+        self.hit = False
 
     def update(self, delta_time: float = 1 / 60) -> None:
         self.center_x -= self.change_x

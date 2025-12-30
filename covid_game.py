@@ -97,7 +97,10 @@ class GameView(arcade.View):
             )
 
             for bloodclot_hit in bloodclot_hit_list:
-                bloodclot_hit.scale = random.uniform(1.5, 4.5) # ENLARGED_BLOODCLOT_SCALE
+                if not bloodclot_hit.hit:
+                    bloodclot_hit.hit = True
+                    bloodclot_hit.scale = random.uniform(1.5, 4.5) # ENLARGED_BLOODCLOT_SCALE
+                    
                 bullet_hit.remove_from_sprite_lists()
                 
             for virus_hit in virus_hit_list:
