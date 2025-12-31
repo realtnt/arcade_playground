@@ -17,6 +17,7 @@ class Bloodclot(arcade.Sprite):
         if self.growth_factor + BLOODCLOT_GROWTH_RATE > self.__current_scale:
             self.__current_scale += BLOODCLOT_GROWTH_RATE
             self.scale = self.__current_scale
+            self.angle = self.angle + BLOODCLOT_ROTATION_SPEED
         
         if self.left < -self.width:
             self.remove_from_sprite_lists()
