@@ -79,55 +79,14 @@ class GameView(arcade.View):
         self.sprites.update()
         self.bullet_list.update()
 
-        self.time_since_last_virus += delta_time
-        if self.time_since_last_virus >= self.virus_spawning_freq:
-            self.time_since_last_virus = 0.0
-            self.spawn_virus()
+        self.spawn_virus(delta_time)
         self.virus_list.update()
 
-        self.time_since_last_bloodclot += delta_time
-        if self.time_since_last_bloodclot >= self.bloodclot_spawning_freq:
-            self.time_since_last_bloodclot = 0.0
-            self.spawn_bloodclot()
+        self.spawn_bloodclot(delta_time)
         self.bloodclot_list.update()
 
-        virus_hit_list = arcade.check_for_collision_with_list(
-            self.player, self.virus_list
-        )
-        for virus_hit in virus_hit_list:
-            self.lives -= 1
-            virus_hit.remove_from_sprite_lists()
-
-        bloodclot_hit_list = arcade.check_for_collision_with_list(
-            self.player, self.bloodclot_list
-        )
-        for bloodclot in bloodclot_hit_list:
-            if not bloodclot.killed_player:
-                bloodclot.killed_player = True
-                self.lives -= 1
-
-        for bullet in self.bullet_list:
-            virus_hit_list = arcade.check_for_collision_with_list(
-                bullet, self.virus_list
-            )
-
-            bloodclot_hit_list = arcade.check_for_collision_with_list(
-                bullet, self.bloodclot_list
-            )
-
-            for bloodclot in bloodclot_hit_list:
-                if not bloodclot.hit:
-                    bloodclot.hit = True
-                    bloodclot.growth_factor = random.uniform(
-                        1.5, 4.5
-                    )
-
-                bullet.remove_from_sprite_lists()
-
-            for virus in virus_hit_list:
-                virus.remove_from_sprite_lists()
-                bullet.remove_from_sprite_lists()
-                self.score += HIT_VALUE * self.multiplier
+        self.check_player_collisions()
+        self.check_bullet_collisions()
 
     def update_player_speed(self) -> None:
         self.player.change_x = 0
@@ -193,27 +152,74 @@ class GameView(arcade.View):
             self.bullet_list.append(self.bullet)
             self.bullet.change_x = BULLET_SPEED
 
-    def spawn_virus(self) -> None:
-        self.virus = v.Virus(self.virus_texture)
-        self.virus.position = (
-            WINDOW_WIDTH + self.virus.width,
-            random.randint(
-                int(self.virus.height), int(WINDOW_HEIGHT - self.virus.height)
-            ),
-        )
-        self.virus_list.append(self.virus)
-        self.virus.change_x = VIRUS_SPEED
+    def spawn_virus(self, delta_time) -> None:
+        self.time_since_last_virus += delta_time
+        if self.time_since_last_virus >= self.virus_spawning_freq:
+            self.time_since_last_virus = 0.0
 
-    def spawn_bloodclot(self) -> None:
-        self.bloodclot = bc.Bloodclot(self.bloodclot_texture)
-        self.bloodclot.position = (
-            WINDOW_WIDTH + self.bloodclot.width,
-            random.randint(
-                int(self.virus.height), int(WINDOW_HEIGHT - self.virus.height)
-            ),
+            self.virus = v.Virus(self.virus_texture)
+            self.virus.position = (
+                WINDOW_WIDTH + self.virus.width,
+                random.randint(
+                    int(self.virus.height), int(WINDOW_HEIGHT - self.virus.height)
+                ),
+            )
+            self.virus_list.append(self.virus)
+            self.virus.change_x = VIRUS_SPEED
+
+    def spawn_bloodclot(self, delta_time) -> None:
+        self.time_since_last_bloodclot += delta_time
+        if self.time_since_last_bloodclot >= self.bloodclot_spawning_freq:
+            self.time_since_last_bloodclot = 0.0
+
+            self.bloodclot = bc.Bloodclot(self.bloodclot_texture)
+            self.bloodclot.position = (
+                WINDOW_WIDTH + self.bloodclot.width,
+                random.randint(
+                    int(self.virus.height), int(WINDOW_HEIGHT - self.virus.height)
+                ),
+            )
+            self.bloodclot_list.append(self.bloodclot)
+            self.bloodclot.change_x = BLOODCLOT_SPEED
+
+    def check_player_collisions(self):
+        virus_hit_player_list = arcade.check_for_collision_with_list(
+            self.player, self.virus_list
         )
-        self.bloodclot_list.append(self.bloodclot)
-        self.bloodclot.change_x = BLOODCLOT_SPEED
+        for virus in virus_hit_player_list:
+            self.lives -= 1
+            virus.remove_from_sprite_lists()
+
+        bloodclot_hit_player_list = arcade.check_for_collision_with_list(
+            self.player, self.bloodclot_list
+        )
+        for bloodclot in bloodclot_hit_player_list:
+            if not bloodclot.killed_player:
+                bloodclot.killed_player = True
+                self.lives -= 1
+
+    def check_bullet_collisions(self):
+        for bullet in self.bullet_list:
+            bullet_hit_virus_list = arcade.check_for_collision_with_list(
+                bullet, self.virus_list
+            )
+
+            bullet_hit_bloodclot_list = arcade.check_for_collision_with_list(
+                bullet, self.bloodclot_list
+            )
+
+            for bloodclot in bullet_hit_bloodclot_list:
+                if not bloodclot.hit:
+                    bloodclot.hit = True
+                    bloodclot.growth_factor = random.uniform(
+                        BLOODCLOT_SCALE_MIN, BLOODCLOT_SCALE_MAX
+                    )
+                bullet.remove_from_sprite_lists()
+
+            for virus in bullet_hit_virus_list:
+                virus.remove_from_sprite_lists()
+                bullet.remove_from_sprite_lists()
+                self.score += HIT_VALUE * self.multiplier
 
 
 def main() -> None:
