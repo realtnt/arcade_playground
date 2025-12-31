@@ -2,11 +2,11 @@ import random
 
 import arcade
 
-import bloodclot
-import bullet
-import player
+import bloodclot as bc
+import bullet as b
+import player as p
 import starfield
-import virus
+import virus as v
 from constants import *
 
 
@@ -43,7 +43,7 @@ class GameView(arcade.View):
         self.player_texture = arcade.load_texture(
             ":resources:/images/space_shooter/playerShip3_orange.png"
         ).rotate_90()
-        self.player = player.Player(self.player_texture)
+        self.player = p.Player(self.player_texture)
         self.player.position = (
             150,
             WINDOW_HEIGHT / 2 - self.player.height / 2,
@@ -57,10 +57,20 @@ class GameView(arcade.View):
         self.bullet_list.draw()
         self.virus_list.draw()
         self.bloodclot_list.draw()
-        
-        arcade.draw_text(f'Score: {self.score}', 20, WINDOW_HEIGHT-20, arcade.color.WHITE, 12)
-        arcade.draw_text(f'Lives: {self.lives}', 20, WINDOW_HEIGHT-40, arcade.color.WHITE, 12)
-        arcade.draw_text(f'Bullets: {self.total_bullets}', 20, WINDOW_HEIGHT-60, arcade.color.WHITE, 12)
+
+        arcade.draw_text(
+            f"Score: {self.score}", 20, WINDOW_HEIGHT - 20, arcade.color.WHITE, 12
+        )
+        arcade.draw_text(
+            f"Lives: {self.lives}", 20, WINDOW_HEIGHT - 40, arcade.color.WHITE, 12
+        )
+        arcade.draw_text(
+            f"Bullets: {self.total_bullets}",
+            20,
+            WINDOW_HEIGHT - 60,
+            arcade.color.WHITE,
+            12,
+        )
 
     def on_update(self, delta_time) -> None:
         self.starfield.update(delta_time)
@@ -85,34 +95,36 @@ class GameView(arcade.View):
         for virus_hit in virus_hit_list:
             self.lives -= 1
             virus_hit.remove_from_sprite_lists()
-        
+
         bloodclot_hit_list = arcade.check_for_collision_with_list(
             self.player, self.bloodclot_list
         )
-        for bloodclot_hit in bloodclot_hit_list:
-            if not bloodclot_hit.killed_player:
-                bloodclot_hit.killed_player = True
+        for bloodclot in bloodclot_hit_list:
+            if not bloodclot.killed_player:
+                bloodclot.killed_player = True
                 self.lives -= 1
 
-        for bullet_hit in self.bullet_list:
+        for bullet in self.bullet_list:
             virus_hit_list = arcade.check_for_collision_with_list(
-                bullet_hit, self.virus_list
+                bullet, self.virus_list
             )
 
             bloodclot_hit_list = arcade.check_for_collision_with_list(
-                bullet_hit, self.bloodclot_list
+                bullet, self.bloodclot_list
             )
 
-            for bloodclot_hit in bloodclot_hit_list:
-                if not bloodclot_hit.hit:
-                    bloodclot_hit.hit = True
-                    bloodclot_hit.scale = random.uniform(1.5, 4.5) # ENLARGED_BLOODCLOT_SCALE
-                    
-                bullet_hit.remove_from_sprite_lists()
-                
-            for virus_hit in virus_hit_list:
-                virus_hit.remove_from_sprite_lists()
-                bullet_hit.remove_from_sprite_lists()
+            for bloodclot in bloodclot_hit_list:
+                if not bloodclot.hit:
+                    bloodclot.hit = True
+                    bloodclot.scale = random.uniform(
+                        1.5, 4.5
+                    )  # ENLARGED_BLOODCLOT_SCALE
+
+                bullet.remove_from_sprite_lists()
+
+            for virus in virus_hit_list:
+                virus.remove_from_sprite_lists()
+                bullet.remove_from_sprite_lists()
                 self.score += HIT_VALUE * self.multiplier
 
     def update_player_speed(self) -> None:
@@ -168,16 +180,19 @@ class GameView(arcade.View):
 
     def fire_bullet(self) -> None:
         for i in range(1, self.total_bullets + 1):
-            self.bullet = bullet.Bullet(self.bullet_texture)
+            self.bullet = b.Bullet(self.bullet_texture)
             self.bullet.position = (
                 self.player.center_x,
-                self.player.center_y + self.total_bullets * BULLETS_GAP // 2 - (i - 1) * BULLETS_GAP - BULLETS_GAP // 2,
+                self.player.center_y
+                + self.total_bullets * BULLETS_GAP // 2
+                - (i - 1) * BULLETS_GAP
+                - BULLETS_GAP // 2,
             )
             self.bullet_list.append(self.bullet)
             self.bullet.change_x = BULLET_SPEED
 
     def spawn_virus(self) -> None:
-        self.virus = virus.Virus(self.virus_texture)
+        self.virus = v.Virus(self.virus_texture)
         self.virus.position = (
             WINDOW_WIDTH + self.virus.width,
             random.randint(
@@ -188,7 +203,7 @@ class GameView(arcade.View):
         self.virus.change_x = VIRUS_SPEED
 
     def spawn_bloodclot(self) -> None:
-        self.bloodclot = bloodclot.Bloodclot(self.bloodclot_texture)
+        self.bloodclot = bc.Bloodclot(self.bloodclot_texture)
         self.bloodclot.position = (
             WINDOW_WIDTH + self.bloodclot.width,
             random.randint(
