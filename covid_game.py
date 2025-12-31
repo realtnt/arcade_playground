@@ -82,10 +82,17 @@ class GameView(arcade.View):
         virus_hit_list = arcade.check_for_collision_with_list(
             self.player, self.virus_list
         )
-
         for virus_hit in virus_hit_list:
             self.lives -= 1
             virus_hit.remove_from_sprite_lists()
+        
+        bloodclot_hit_list = arcade.check_for_collision_with_list(
+            self.player, self.bloodclot_list
+        )
+        for bloodclot_hit in bloodclot_hit_list:
+            if not bloodclot_hit.killed_player:
+                bloodclot_hit.killed_player = True
+                self.lives -= 1
 
         for bullet_hit in self.bullet_list:
             virus_hit_list = arcade.check_for_collision_with_list(
