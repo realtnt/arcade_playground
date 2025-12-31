@@ -26,6 +26,8 @@ class GameView(arcade.View):
         self.score = 0
         self.multiplier = 1
         self.total_bullets = 1
+        self.virus_spawning_freq = 1.0
+        self.bloodclot_spawning_freq = 2.5
 
     def setup(self) -> None:
         self.bullet_texture = arcade.load_texture(
@@ -78,13 +80,13 @@ class GameView(arcade.View):
         self.bullet_list.update()
 
         self.time_since_last_virus += delta_time
-        if self.time_since_last_virus >= 1.0:
+        if self.time_since_last_virus >= self.virus_spawning_freq:
             self.time_since_last_virus = 0.0
             self.spawn_virus()
         self.virus_list.update()
 
         self.time_since_last_bloodclot += delta_time
-        if self.time_since_last_bloodclot >= 2.5:
+        if self.time_since_last_bloodclot >= self.bloodclot_spawning_freq:
             self.time_since_last_bloodclot = 0.0
             self.spawn_bloodclot()
         self.bloodclot_list.update()
@@ -116,9 +118,9 @@ class GameView(arcade.View):
             for bloodclot in bloodclot_hit_list:
                 if not bloodclot.hit:
                     bloodclot.hit = True
-                    bloodclot.scale = random.uniform(
+                    bloodclot.growth_factor = random.uniform(
                         1.5, 4.5
-                    )  # ENLARGED_BLOODCLOT_SCALE
+                    )
 
                 bullet.remove_from_sprite_lists()
 
