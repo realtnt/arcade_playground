@@ -19,7 +19,7 @@ class GameView(arcade.View):
         self.directions = {"up": False, "down": False, "left": False, "right": False}
         self.starfield = starfield.Starfield()
         self.bullet_list = arcade.SpriteList()
-        self.sprites = arcade.SpriteList()
+        self.player_sprite = arcade.SpriteList()
         self.bloodclot_list = arcade.SpriteList()
         self.virus_list = arcade.SpriteList()
         self.lives = LIVES
@@ -50,12 +50,12 @@ class GameView(arcade.View):
             150,
             WINDOW_HEIGHT / 2 - self.player.height / 2,
         )
-        self.sprites.append(self.player)
+        self.player_sprite.append(self.player)
 
     def on_draw(self) -> None:
         self.clear()
         self.starfield.draw()
-        self.sprites.draw()
+        self.player_sprite.draw()
         self.bullet_list.draw()
         self.virus_list.draw()
         self.bloodclot_list.draw()
@@ -75,14 +75,13 @@ class GameView(arcade.View):
         )
 
     def on_update(self, delta_time) -> None:
-        self.starfield.update(delta_time)
-        self.sprites.update()
-        self.bullet_list.update()
-
         self.spawn_virus(delta_time)
-        self.virus_list.update()
-
         self.spawn_bloodclot(delta_time)
+        
+        self.starfield.update(delta_time)
+        self.player_sprite.update()
+        self.bullet_list.update()
+        self.virus_list.update()
         self.bloodclot_list.update()
 
         self.check_player_collisions()
