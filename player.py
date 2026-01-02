@@ -4,6 +4,9 @@ from constants import *
 class Player(arcade.Sprite):
     def __init__(self, texture) -> None:
         super().__init__(texture, scale=SPRITE_SCALING)
+        self.lives = LIVES
+        self.score = 0
+        self.multiplier = 1
 
     def update(self, delta_time: float = 1 / 60) -> None:
         self.center_x += self.change_x
