@@ -154,7 +154,7 @@ class GameView(arcade.View):
                 self.__setup_bullet(i, 0, 0)
     
     def __setup_bullet(self, bullet_index: int, angle: int, change_y: int) -> None:
-        bullet = b.Bullet(self.bullet_texture)
+        bullet = b.Bullet(self.bullet_texture, 2)
         bullet.position = (
             self.player.center_x,
             self.player.center_y
