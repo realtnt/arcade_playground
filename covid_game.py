@@ -144,18 +144,28 @@ class GameView(arcade.View):
             self.directions["right"] = False
             self.update_player_speed()
 
-    def fire_bullet(self) -> None:
+    def fire_bullet(self) -> None:            
         for i in range(1, self.total_bullets + 1):
-            self.bullet = b.Bullet(self.bullet_texture)
-            self.bullet.position = (
-                self.player.center_x,
-                self.player.center_y
-                + self.total_bullets * BULLETS_GAP // 2
-                - (i - 1) * BULLETS_GAP
-                - BULLETS_GAP // 2,
-            )
-            self.bullet_list.append(self.bullet)
-            self.bullet.change_x = BULLET_SPEED
+            if self.total_bullets > 4 and i < 3:
+                self.__setup_bullet(i, -30, 5)
+            elif self.total_bullets > 4 and i > 5:
+                self.__setup_bullet(i, 30, -5)
+            else:
+                self.__setup_bullet(i, 0, 0)
+    
+    def __setup_bullet(self, bullet_index: int, angle: int, change_y: int) -> None:
+        bullet = b.Bullet(self.bullet_texture)
+        bullet.position = (
+            self.player.center_x,
+            self.player.center_y
+            + self.total_bullets * BULLETS_GAP // 2
+            - (bullet_index - 1) * BULLETS_GAP
+            - BULLETS_GAP // 2,
+        )
+        bullet.angle = angle
+        bullet.change_y = change_y
+        bullet.change_x = BULLET_SPEED
+        self.bullet_list.append(bullet)
 
     def spawn_virus(self, delta_time) -> None:
         self.time_since_last_virus += delta_time
