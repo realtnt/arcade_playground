@@ -32,11 +32,7 @@ class GameView(arcade.View):
         self.bonus_spawning_freq = 4.0
         self.powerup_spawning_freq = 3.5
 
-    def setup(self) -> None:
-        self.bonus_texture = arcade.load_texture(
-            ":resources:/images/items/gold_1.png"
-        )
-        
+    def setup(self) -> None:        
         self.bullet_texture = arcade.load_texture(
             ":resources:/images/space_shooter/laserBlue01.png"
         )
@@ -196,7 +192,7 @@ class GameView(arcade.View):
         if self.time_since_last_bonus >= self.bonus_spawning_freq:
             self.time_since_last_bonus = 0.0
 
-            self.bonus = bn.Bonus(self.bonus_texture)
+            self.bonus = bn.Bonus()
             self.bonus.position = (
                 random.randint(
                     int(self.bonus.width), int(WINDOW_WIDTH - self.bonus.width)

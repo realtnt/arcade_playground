@@ -6,8 +6,10 @@ from constants import *
 
 
 class Bonus(arcade.Sprite):
-    def __init__(self, texture) -> None:
-        super().__init__(texture, scale=SPRITE_SCALING)
+    def __init__(self) -> None:
+        self.bonus_texture = arcade.load_texture(":resources:/images/items/gold_1.png")
+        super().__init__(self.bonus_texture, scale=SPRITE_SCALING)
+
         self.__current_scale = SPRITE_SCALING
         self.__duration = random.randint(4, 9)
         self.__time_alive = 0.0
@@ -19,9 +21,9 @@ class Bonus(arcade.Sprite):
 
     def update(self, delta_time: float = 1 / 60) -> None:
         self.__time_alive += delta_time
-        
+
         self.randomise_direction()
-        
+
         self.center_x += self.speed_x * delta_time
         self.center_y -= self.speed_y * delta_time
 
@@ -47,5 +49,7 @@ class Bonus(arcade.Sprite):
             self.remove_from_sprite_lists()
 
     def randomise_direction(self):
-        self.speed_x *= random.choice([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1])
+        self.speed_x *= random.choice(
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1]
+        )
         self.speed_y *= random.choice([1, 1, 1, 1, 1, 1, 1, -1])
